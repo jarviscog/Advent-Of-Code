@@ -1,6 +1,6 @@
 // Copied from https://dev.to/nickymeuleman/advent-of-code-2022-day-3-53dm
-// However, I really tried to understand the solution, as I want to lean some more powerful rust
-// teqniques.
+// However, I really tried to understand the solution, as I want to lean some more powerful Rust
+// techniques.
 
 pub fn part_one() -> u32 {
 
