@@ -47,6 +47,7 @@ fn same_location(p1: &Point, p2: &Point) -> bool {
 
 fn adjacent_symbol(symbols: Vec<Point>, p: Point) -> Option<Point> {
 
+    // This function is terrible. I should fix this at some point
     let left: Point;
     let right: Point;
     let top: Point;
