@@ -1,13 +1,13 @@
 use std::fs;
-use regex::Regex;
 use std::cmp::Ordering;
 use std::time::Instant;
+use std::collections::HashMap;
 
 // This problem seems like a great one to get into ideas of enums and strucs, so I'm going to do
 // some things that don't make sense for this problem, but are good to know
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 enum Card {
     Ace,
     King,
@@ -88,12 +88,12 @@ impl Card {
 }
 
 struct Hand {
-    cards: [Card; 5]
+    cards: Vec<Card>
 }
 
 impl Hand {
     
-    fn new(cards: [Card; 5]) -> Hand {
+    fn new(cards: Vec<Card>) -> Hand {
         Hand {
             cards
         }
@@ -109,26 +109,17 @@ impl Hand {
                )
     }
 
-    // Returns a string where each column is the number of each card, with the ones column being
-    // the twos, the tens colum being the threes, etc.
-    // So 23557 is "102011"
-    fn hand_as_string(&self) -> String {
-        const TEN: u64 = 10;
-        let mut ans = 0;
-        for card in self.cards {
-            if card.to_char() != 'J' {
-                ans += TEN.pow(card.value());
-            }
-        }
-        ans.to_string()
-    }
-
     fn hand_type_hash(&self) -> u32 {
-        let mut digits: Vec<u32> = self.hand_as_string().chars().map(|d| d.to_digit(10).unwrap()).collect();
-        digits.sort();
+
+        let mut counts = HashMap::new();
+        self.cards.iter().for_each( |val| {counts.entry(val).and_modify(|count| { *count += 1 }).or_insert(1); } );
+
+        let mut c = counts.values().cloned().collect::<Vec<u32>>();
+        c.sort();
+
         let mut ans = 0;
         let mut place_loc = 0;
-        while let Some(d) = digits.pop() {
+        while let Some(d) = c.pop() {
             if d == 0 {
                 break;
             }
@@ -221,12 +212,8 @@ fn main() {
     for line in contents.lines() {
         let (cards_str, bet_str) = line.split_once(" ").unwrap();
         let cards_chars = cards_str.chars();
-        let mut cards: [Card; 5] = [Card::Ace; 5];
-        for (i, card_char) in cards_chars.enumerate() {
-            cards[i] = Card::from_char(card_char).unwrap();
-        }
         let bet: u32 = bet_str.parse::<u32>().unwrap();
-        hand_bet_pairs.push(HandBet::new(Hand::new(cards), bet));
+        hand_bet_pairs.push(HandBet::new(Hand::new(cards_str.chars().map(|c| Card::from_char(c).unwrap()).collect()), bet));
     }
     
     // Now this is just a sorting question, and we can have rust do it for us
