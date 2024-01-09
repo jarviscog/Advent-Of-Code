@@ -1,6 +1,7 @@
-use std::{fs, num};
+use std::fs;
 use regex::Regex;
 use std::cmp::Ordering;
+use std::time::Instant;
 
 // This problem seems like a great one to get into ideas of enums and strucs, so I'm going to do
 // some things that don't make sense for this problem, but are good to know
@@ -126,77 +127,15 @@ impl Hand {
         let mut digits: Vec<u32> = self.hand_as_string().chars().map(|d| d.to_digit(10).unwrap()).collect();
         digits.sort();
         let mut ans = 0;
-        ans += digits.pop().unwrap();
-        ans += digits.pop().unwrap_or(0) << 4;
-        ans += digits.pop().unwrap_or(0) << 8;
-        ans += digits.pop().unwrap_or(0) << 12;
-        ans += digits.pop().unwrap_or(0) << 16;
-        return ans
-    }
-
-
-    fn hand_as_value(&self) -> u32 {
-        let mut ans: u32 = 0;
-        ans += self.cards[4].value() << 0;
-        ans += self.cards[3].value() << 4;
-        ans += self.cards[2].value() << 8;
-        ans += self.cards[1].value() << 12;
-        ans += self.cards[0].value() << 16;
-        ans
-    }
-
-    fn is_five_of_kind(bits: &String) -> bool {
-        if bits.contains("5") {
-            return true;
-        }
-        false
-    }
-
-    fn is_four_of_kind(bits: &String) -> bool {
-        if bits.contains("4") {
-            return true;
-        }
-        false
-    }
-
-    fn is_full_house(bits: &String) -> bool {
-        if bits.contains("3") && bits.contains("2") {
-            return true;
-        }
-        false
-    }
-
-    fn is_three_of_kind(bits: &String) -> bool {
-        if bits.contains("3") {
-            return true;
-        }
-        false
-    }
-
-    fn two_pair(bits: &String) -> bool {
-        let re = Regex::new(r"2").unwrap();
-        if re.find_iter(&bits).count() == 2 {
-            return true;
-        }
-        false
-    }
-
-    fn one_pair(bits: &String) -> bool {
-        if bits.to_string().contains("2") {
-            return true;
-        }
-        false
-    }
-
-    fn joker_count(&self) -> u32 {
-        let mut count = 0;
-        for card in self.cards {
-            match card {
-               Card::Joker => { count += 1 }
-               _ => {}
+        let mut place_loc = 0;
+        while let Some(d) = digits.pop() {
+            if d == 0 {
+                break;
             }
+            ans += d << place_loc;
+            place_loc += 4;
         }
-        count 
+        return ans
     }
 
     // if hash == 0x00014 { return 5 } // XXXXY -> 4 of kind
@@ -223,12 +162,14 @@ impl Hand {
         return 0;
     }
 
-    // This will be the value assuming that the J card is not acting as a different card
     fn ultimate_value(&self) -> u32 {
         // Bits 0-15 are the ultimate hand value, bits 24-27 are for the type value
         let mut ans = 0;
-        // println!("{}", self.to_string());
-        ans += self.hand_as_value();
+        ans += self.cards[4].value() << 0;
+        ans += self.cards[3].value() << 4;
+        ans += self.cards[2].value() << 8;
+        ans += self.cards[1].value() << 12;
+        ans += self.cards[0].value() << 16;
         ans += self.type_value() << 24;
         ans
     }
@@ -241,19 +182,6 @@ impl PartialEq for Hand {
 }
 
 impl PartialOrd for Hand {
-
-    fn lt(&self, other: &Self) -> bool {
-        self.ultimate_value() < other.ultimate_value()    
-    }
-    fn le(&self, other: &Self) -> bool {
-        self.ultimate_value() <= other.ultimate_value()    
-    }
-    fn gt(&self, other: &Self) -> bool {
-        self.ultimate_value() > other.ultimate_value()    
-    }
-    fn ge(&self, other: &Self) -> bool {
-        self.ultimate_value() >= other.ultimate_value()    
-    }
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         if self.ultimate_value() > other.ultimate_value() {
             Some(Ordering::Greater)
@@ -281,6 +209,8 @@ impl HandBet {
 
 fn main() {
     
+    let now = Instant::now();
+
     let file_path = "input.txt";
     //let file_path = "test_input.txt";
     let contents = fs::read_to_string(file_path)
@@ -307,5 +237,6 @@ fn main() {
         //println!("{}, {}, {:X}, {}", hb.hand.to_string(), hb.bet, hb.hand.hand_type_hash(), hb.hand.type_value());
         sum += winnings;
     }
+    println!("Finished in {:.2?}", now.elapsed());
     println!("{}", sum);
 }
