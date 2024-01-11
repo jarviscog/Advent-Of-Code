@@ -1,5 +1,6 @@
 **/target
 **/input.txt
 **/test_input.txt
+*.out
 2023/day06ab/input_part_two.txt
 2023/day06ab/input_part_one.txt
