@@ -25,36 +25,10 @@ enum Direction {
     Down
 }
 
-impl Direction {
-    fn to_char(&self) -> char {
-        match self {
-            Direction::Up => {'U'}
-            Direction::Right => {'R'}
-            Direction::Down => {'D'}
-            Direction::Left => {'L'}
-        }
-    
-    }
-}
-
-fn main() {
-
-    let file_path = "input.txt";
-    //let file_path = "test_input.txt";
-    let contents = fs::read_to_string(file_path)
-        .expect("File path");
-
-
-    let mut grid: Vec<Vec<char>> = Vec::new();
-    let mut output_grid: Vec<Vec<char>> = Vec::new();
-
-    for line in contents.lines() {
-        grid.push(line.chars().collect());
-        output_grid.push(line.chars().collect());
-    }
-
+fn compute_power(grid: &Vec<Vec<char>>, start: Operation) -> u32 {
     let mut list_of_operations: Vec<Operation> = Vec::new();
-    list_of_operations.push(Operation::new(0,0,Direction::Right));
+    list_of_operations.push(start);
+    let mut output_grid: Vec<Vec<char>> = grid.clone();
 
     while list_of_operations.len() > 0 {
         let current_op= list_of_operations.remove(0);
@@ -187,13 +161,76 @@ fn main() {
     for line in &output_grid {
         for c in line {
             match c {
-                'L' | 'R' | 'U' | 'D' => { power += 1; print!("#"); }
-                _ => { print!("."); }
+                'L' | 'R' | 'U' | 'D' => { power += 1; }
+                _ => { }
             }
         }
-        println!();
     }
-    println!("Power: {}", power);
+
+    return power;
+
+}
+
+impl Direction {
+    fn to_char(&self) -> char {
+        match self {
+            Direction::Up => {'U'}
+            Direction::Right => {'R'}
+            Direction::Down => {'D'}
+            Direction::Left => {'L'}
+        }
+    
+    }
+
+}
+
+fn main() {
+
+    let file_path = "input.txt";
+    //let file_path = "test_input.txt";
+    let contents = fs::read_to_string(file_path)
+        .expect("File path");
+
+
+    let mut grid: Vec<Vec<char>> = Vec::new();
+
+    for line in contents.lines() {
+        grid.push(line.chars().collect());
+    }
+
+    let mut max_power = 0;
+    let width = grid[0].len();
+    let height = grid.len();
+    for y in 0..height {
+        let power = compute_power(&grid, Operation::new(0, y as i32, Direction::Right));
+        if power > max_power {
+            max_power = power;
+        }
+    }
+    println!("Side one done");
+    for y in 0..height {
+        let power = compute_power(&grid, Operation::new(width as i32, y as i32, Direction::Left));
+        if power > max_power {
+            max_power = power;
+        }
+    }
+    println!("Side two done");
+    for x in 0..width {
+        let power = compute_power(&grid, Operation::new(x as i32, 0, Direction::Down));
+        if power > max_power {
+            max_power = power;
+        }
+    }
+    println!("Side three done");
+    for x in 0..width {
+        let power = compute_power(&grid, Operation::new(x as i32, height as i32, Direction::Up));
+        if power > max_power {
+            max_power = power;
+        }
+    }
+    println!("Side four done");
+
+    println!("Max power: {}", max_power);
 
 
 }

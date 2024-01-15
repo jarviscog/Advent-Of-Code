@@ -20,6 +20,11 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
         return 1;
     }
 
+    if counts.len() == 0 {
+        println!("No more numbers. Solved!");
+        return 1;
+    }
+
     if next_question_location.is_none() {
         println!("No more question marks");
         return 1;
@@ -36,6 +41,8 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
 
     // If there is only one number left
     if counts.len() == 1 {
+
+
         println!("Only one number left");
         if springs.len() == counts[0] as usize {
             return 1;
@@ -47,7 +54,6 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
             return possibilities as u32;
         } else if !springs.contains(".") { // There is only ??? and ### 
             // Find the first and last ???. This will be our bounds
-            let first_position = springs.find("?").unwrap();
             let mut last_position = 0;
             for (i, c) in springs.chars().enumerate() {
                 if c == '?' {
@@ -55,10 +61,20 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
                 }
 
             }
+            
+            if springs.chars().filter(|c| *c == '#').count() == 1 {
+                let mut earliest_position: i32 = springs.find("#").unwrap() as i32 - 1 - counts[0] as i32;
+                if earliest_position < 0 { earliest_position = 0; }
+                let mut latest_position = springs.rfind("#").unwrap();
+                if latest_position + counts[0] as usize > springs.len() as usize { latest_position = (latest_position + counts[0] as usize) - springs.len() as usize; }
 
-            let min_width = last_position - first_position + 1;
-            let left_clipping = 0;
-            let right_clipping = 0;
+                println!("Can go from {} to {}", earliest_position, latest_position);
+                println!("Number of possibilities: {}", latest_position as u32 - earliest_position as u32 + 1);
+                return latest_position as u32 - earliest_position as u32 + 1;
+
+            }
+            println!("Unimplemented");
+
 
             
 
@@ -104,6 +120,14 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
 
     }
 
+    let next_question_hash_re = Regex::new(r"^([\?\#])+.").unwrap();
+    let first_question_hash_segment = next_question_hash_re.find(springs);
+
+    if counts[0] as usize > first_question_hash_segment.unwrap().len() - 1  {
+        println!("First count will not fit in first segment");
+        return get_possibilities(&springs[springs.find(".").unwrap()..], counts);
+    }
+
     if let Some(loc) = next_question_location {
 
         let question_re = Regex::new(r"\?*").unwrap();
@@ -139,8 +163,13 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
     if counts.len() > 1 {
         let next_question_hash_re = Regex::new(r"^([\?\#])+.").unwrap();
         let first_question_hash_segment = next_question_hash_re.find(springs);
+        
+        if counts[0] as usize > first_question_hash_segment.unwrap().len() - 1  {
+            println!("First count will not fit in first segment");
+            return get_possibilities(&springs[springs.find(".").unwrap()..], counts[1..].to_vec());
+        }
         // If only the first number fits in the next segment seperated by a .
-        if (counts[0] + counts[1] ) as usize > first_question_hash_segment.unwrap().len() - 1 {
+        if (counts[0] + counts[1] + 1) as usize > first_question_hash_segment.unwrap().len() - 1 {
             println!("Only the first one will fit in this segment");
             return get_possibilities(&springs[0..first_question_hash_segment.unwrap().len() - 1], counts[0..1].to_vec())
                 * get_possibilities(&springs[first_question_hash_segment.unwrap().len()..], counts[1..].to_vec());
@@ -148,7 +177,7 @@ fn get_possibilities(springs: &str, counts: Vec<u8>) -> u32 {
         }
     }
 
-    print!("============= I don't know what to do here sorry Jarvis: {} ", springs);
+    print!("============= Don't know what to do: {} ", springs);
     for n in counts {
         print!(" {}", n);
     }
