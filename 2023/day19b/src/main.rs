@@ -2,7 +2,9 @@ use core::panic;
 use std::fs;
 use std::collections::HashMap;
 use std::time::Instant;
+use std::ops::Range;
 
+#[derive(PartialEq, Eq, Hash, Clone, Copy)]
 enum Category {
     Extreme,
     Musical,
@@ -21,7 +23,7 @@ impl Category {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 enum Condition {
     GreaterThan,
     LessThan
@@ -36,6 +38,7 @@ impl Condition {
     }
 }
 
+#[derive(Clone)]
 struct Rule {
     category: Category,
     condition: Condition,
@@ -130,6 +133,63 @@ fn is_accepted(part: &Part, map: &HashMap<String, Workflow>) -> bool {
     }
 }
 
+fn count(mut ranges: HashMap<Category, Range<u32>>, workflow_name: &str, map: &HashMap<String, Workflow>) -> usize {
+
+    if workflow_name == "R" {
+        return 0;
+    } 
+    if workflow_name == "A" {
+        return 
+            (ranges[&Category::Extreme].len() + 1) * 
+            (ranges[&Category::Musical].len() + 1) * 
+            (ranges[&Category::Aerodynamic].len() + 1) * 
+            (ranges[&Category::Shiny].len() + 1) 
+    }
+
+    let workflow = map.get(workflow_name).unwrap().clone();
+    let mut total = 0;
+
+    let mut brk = false;
+    
+    for rule in workflow.rules.clone() {
+        
+        let low: u32 = ranges.clone()
+            .get(&rule.category)
+            .unwrap()
+            .start.clone();
+        let high: u32 = ranges.get(&rule.category.clone()).unwrap().clone().end.clone();
+        let t: Range<u32>;
+        let f: Range<u32>;
+        match rule.condition {
+            Condition::LessThan => {
+                t = low..rule.amount - 1;
+                f = rule.amount..high;
+            }
+            Condition::GreaterThan => {
+                t = rule.amount + 1..high;
+                f = low..rule.amount;
+            }
+        }
+        if t.start <= t.end {
+            let mut ranges_copy = ranges.clone();
+            *ranges_copy.get_mut(&rule.category).unwrap() = t;
+            total += count(ranges_copy, &rule.dest, map)
+        }
+        if f.start <= f.end {
+            *ranges.get_mut(&rule.category).unwrap() = f;
+        } else {
+            brk = true;
+            break;
+        }
+    } 
+    if brk == false {
+        total += count(ranges, &workflow.dest, map)
+    }
+
+
+    total
+}
+
 fn main() {
 
     let now = Instant::now();
@@ -195,49 +255,17 @@ fn main() {
             );
     }
     
+    let mut ranges: HashMap<Category, Range<u32>> = HashMap::new();
+    ranges.insert(Category::Extreme, 1..4000);
+    ranges.insert(Category::Musical, 1..4000);
+    ranges.insert(Category::Aerodynamic, 1..4000);
+    ranges.insert(Category::Shiny, 1..4000);
 
-    let mut total = 0;
-    //for part_str in parts_str.lines() {
-    //    let (x_str, rest) = part_str.split_once(",").unwrap();
-    //    let (m_str, rest) = rest.split_once(",").unwrap();
-    //    let (a_str, s_str) = rest.split_once(",").unwrap();
-    //    let x = x_str.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u32>().unwrap();
-    //    let m = m_str.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u32>().unwrap();
-    //    let a = a_str.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u32>().unwrap();
-    //    let s = s_str.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u32>().unwrap();
-    //    let part = Part::new(x, m, a, s);
-
-    //    if is_accepted(&part, &workflows) {
-    //        total += part.total();
-    //    }
-    //}
-    
-
-    let mut duration = now.elapsed();
-    for x in 0..4000 {
-        for m in 0..4000 {
-            for a in 0..4000 {
-                for s in 0..4000 {
-                    let part = Part::new(x,m,a,s);
-                    if is_accepted(&part, &workflows) {
-                        total += part.total();
-                    }
-                }
-            }
-            duration = now.elapsed();
-            println!("{:.2?}", duration);
-        }
-    }
-
-
-
-
-
-
-
-    
+    let total = count(ranges, "in", &workflows);
 
     println!("{}", total);
+    let duration = now.elapsed();
+    println!("{:.2?}", duration);
 
 
     
