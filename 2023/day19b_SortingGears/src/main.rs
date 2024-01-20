@@ -12,30 +12,10 @@ enum Category {
     Shiny
 }
 
-impl Category {
-    fn to_char(&self) -> char {
-        match self {
-           Self::Extreme => 'x',
-           Self::Musical => 'm',
-           Self::Aerodynamic => 'a',
-           Self::Shiny => 's',
-        }
-    }
-}
-
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Clone)]
 enum Condition {
     GreaterThan,
     LessThan
-}
-
-impl Condition {
-    fn to_char(&self) -> char {
-        match self {
-           Self::GreaterThan => '>',
-           Self::LessThan => '<',
-        }
-    }
 }
 
 #[derive(Clone)]
@@ -59,15 +39,13 @@ impl Rule {
 
 
 struct Workflow {
-    name: String,
     rules: Vec<Rule>,
     dest: String
 }
 
 impl Workflow {
-    fn new(name: String, rules: Vec<Rule>, dest: String) -> Workflow {
+    fn new(rules: Vec<Rule>, dest: String) -> Workflow {
         Workflow {
-            name,
             rules,
             dest
         }
@@ -132,6 +110,7 @@ fn is_accepted(part: &Part, map: &HashMap<String, Workflow>) -> bool {
         return false;
     }
 }
+
 
 fn count(mut ranges: HashMap<Category, Range<u32>>, workflow_name: &str, map: &HashMap<String, Workflow>) -> usize {
 
@@ -248,10 +227,7 @@ fn main() {
         }
         workflows.insert(
             String::from(name),
-            Workflow::new(String::from(name), 
-                          line_rules, 
-                          String::from(dest)
-                          )
+            Workflow::new( line_rules, String::from(dest))
             );
     }
     
@@ -266,8 +242,4 @@ fn main() {
     println!("{}", total);
     let duration = now.elapsed();
     println!("{:.2?}", duration);
-
-
-    
-
 }
