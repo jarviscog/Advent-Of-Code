@@ -12,18 +12,16 @@ def try_remove_levels(nums: list[str]) -> bool:
     return False
 
 
-def is_safe(elements: list[str]):
+def is_safe(elements: list[str]) -> bool:
     asc_or_desc = UNSET
-    for i in range(0, len(elements)):
-
-        if i == len(elements) - 1: # skip at last element 
-            continue
-
+    for i in range(0, len(elements) - 1):
         diff = int(elements[i]) - int(elements[i+1])
 
-        # All asc, desc
-        if diff == 0:
+        # within bounds
+        if diff == 0 or abs(diff) > 3:
             return False
+
+        # All asc, desc
         if diff > 0: # desc
             if asc_or_desc == INCREASING:
                 return False
@@ -33,13 +31,6 @@ def is_safe(elements: list[str]):
                 return False
             asc_or_desc = INCREASING
 
-        # within bounds
-        diff = abs(diff)
-        if diff < 1:
-            return False
-        if diff > 3:
-            return False
-
     return True
 
 
@@ -48,17 +39,11 @@ def main():
     sum_safe_rows = 0
     with open("./input.txt") as file:
         for line in file.readlines():
-            elements = line.split(" ")
-            if is_safe(elements):
-                sum_safe_rows += 1
-                print("ogsafe")
-            else:
-                if try_remove_levels(elements):
-                    sum_safe_rows += 1
-                    print("safe")
-                else:
-                    print("non-safe")
 
+            elements = line.split(" ")
+
+            if is_safe(elements) or try_remove_levels(elements):
+                sum_safe_rows += 1
 
     print(sum_safe_rows)
 

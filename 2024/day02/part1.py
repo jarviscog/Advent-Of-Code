@@ -3,19 +3,18 @@ UNSET = 0
 INCREASING = 1
 DECREASING = 2
 
-def is_safe(row: str):
+def is_safe(row: str) -> bool:
     elements = row.split(" ")
     asc_or_desc = UNSET
-    for i in range(0, len(elements)):
-
-        if i == len(elements) - 1: # skip at last element 
-            continue
+    for i in range(0, len(elements) - 1):
 
         diff = int(elements[i]) - int(elements[i+1])
 
-        # All asc, desc
-        if diff == 0:
+        # within bounds
+        if diff == 0 or abs(diff) > 3:
             return False
+
+        # All asc, desc
         if diff > 0: # desc
             if asc_or_desc == INCREASING:
                 return False
@@ -24,13 +23,6 @@ def is_safe(row: str):
             if asc_or_desc == DECREASING:
                 return False
             asc_or_desc = INCREASING
-
-        # within bounds
-        diff = abs(diff)
-        if diff < 1:
-            return False
-        if diff > 3:
-            return False
 
     return True
 
