@@ -42,10 +42,6 @@ def main():
         for line in file.readlines():
             if is_safe(line):
                 sum_safe_rows += 1
-                print("safe")
-            else:
-                print("unsafe")
-
 
     print(sum_safe_rows)
 
