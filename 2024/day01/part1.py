@@ -1,8 +1,4 @@
 
-
-
-
-
 def main():
     
     with open("./input.txt") as file:
@@ -14,10 +10,6 @@ def main():
         arr1.append(int(line.split("   ")[0]))
         arr2.append(int(line.split("   ")[1]))
 
-    print("First of each")
-    print(arr1[0])
-    print(arr2[0])
-
     arr1.sort()
     arr2.sort()
 
@@ -26,7 +18,6 @@ def main():
         diff_sum += abs(arr1[i] - arr2[i])
 
     print(diff_sum)
-
 
 
 if __name__ == "__main__":
