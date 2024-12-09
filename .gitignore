@@ -1,6 +1,13 @@
 **/target
-**/input.txt
-**/test_input.txt
 *.out
-2023/day06ab/input_part_two.txt
-2023/day06ab/input_part_one.txt
+
+**/test_input.txt
+
+**/input.txt
+**/input1.txt
+**/input2.txt
+**/input3.txt
+**/input_test.txt
+**/input_test1.txt
+**/input_test2.txt
+**/input_test3.txt
